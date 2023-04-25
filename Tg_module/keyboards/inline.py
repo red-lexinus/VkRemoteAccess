@@ -14,7 +14,30 @@ class DetailedAnswer(CallbackData, prefix="DtA"):
     post_id: int
 
 
+class MainDialog(CallbackData, prefix="MnD"):
+    next_dialog: str
+
+
 # callback_data=StandardAnswer(group_id=1, post_id=2, answer_id=3).pack()
+
+def get_main_help_kb():
+    builder = InlineKeyboardBuilder()
+    builder.button(
+        text=f"Зачем нужен token",
+        callback_data=MainDialog(next_dialog='help_token').pack())
+    builder.button(
+        text=f"Как и где получить token",
+        callback_data=MainDialog(next_dialog='help_get_token').pack())
+    builder.button(
+        text=f"Как подписаться на вк группу",
+        callback_data=MainDialog(next_dialog='help_sub_group').pack())
+    builder.button(
+        text=f"Как расширить свои возможности",
+        callback_data=MainDialog(next_dialog='help_account').pack())
+    builder.adjust(1)
+    return builder.as_markup()
+
+
 def get_answer():
     builder = InlineKeyboardBuilder()
     builder.button(text=f"Тест", callback_data=StandardAnswer(group_id=1, post_id=2, answer_id=3).pack())

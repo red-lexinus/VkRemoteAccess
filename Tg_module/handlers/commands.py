@@ -2,7 +2,7 @@ import asyncio
 from aiogram.filters import Command
 from aiogram import (Dispatcher, types, Router, F, flags)
 
-import DbMager_module as Db
+
 
 from Tg_module.filters import ChatTypeFilter
 from Tg_module.keyboards import inline

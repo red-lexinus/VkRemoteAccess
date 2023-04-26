@@ -5,7 +5,6 @@ from aiogram import F
 from aiogram.types import CallbackQuery
 from aiogram.filters import Text
 
-import DbMager_module as Db
 
 from Tg_module.filters import ChatTypeFilter, InTextFilter
 from Tg_module.keyboards import inline

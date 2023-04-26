@@ -12,6 +12,9 @@ class User(Base):
     available = Column(Boolean, default=True)
     time_zone = Column(Integer, default=3)
 
+    def __repr__(self):
+        return f"user({self.id}; {self.available}; {self.time_zone})"
+
 
 class Group(Base):
     __tablename__ = 'groups'
@@ -20,28 +23,40 @@ class Group(Base):
     serviceable = Column(Boolean, default=True)
     last_post_id = Column(Integer, default=0)
 
+    def __repr__(self):
+        return f"group({self.id}; {self.domain}; {self.serviceable}; {self.last_post_id})"
+
 
 class VkApiToken(Base):
     __tablename__ = 'tokens'
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey('users.id', ondelete="CASCADE"), nullable=False)
     token = Column(Text, nullable=False)
     nickname = Column(String, nullable=False)
     serviceable = Column(Boolean, default=True)
 
+    def __repr__(self):
+        return f"token({self.id}; {self.user_id}; {self.serviceable}; {self.nickname})"
+
 
 class Subscription(Base):
     __tablename__ = 'subscriptions'
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     group_id = Column(Integer, ForeignKey('groups.id', ondelete="CASCADE"), nullable=False)
     user_id = Column(Integer, ForeignKey('users.id', ondelete="CASCADE"), nullable=False)
     token_id = Column(Integer, ForeignKey('tokens.id', ondelete="CASCADE"), nullable=False)
 
+    def __repr__(self):
+        return f"subscription({self.id}; {self.user_id}; {self.group_id}; {self.token_id})"
+
 
 class Answer(Base):
     __tablename__ = 'answers'
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey('users.id', ondelete="CASCADE"), nullable=False)
     message = Column(String, nullable=False)
     nickname = Column(String)
+
+    def __repr__(self):
+        return f"answer({self.id}; {self.user_id}; {self.nickname}; {self.message})"
 

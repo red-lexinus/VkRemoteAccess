@@ -39,4 +39,3 @@ class Core:
 
 
 core = Core()
-# session.query

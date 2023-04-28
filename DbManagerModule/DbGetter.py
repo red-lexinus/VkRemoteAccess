@@ -1,25 +1,30 @@
-from sqlalchemy import select
+from sqlalchemy import select, join
 
-from .DbClasses import Base, User, Group, Answer, VkApiToken, Subscription
+from .DbClasses import Base, User, Group, Answer, VkApiToken, Subscription, UserRights
 from .DbCore import core
 
 
 class Getter:
     def __init__(self):
-        self.async_session = core.get_async_session()
+        self.__async_session = core.get_async_session()
 
     async def __check_kwargs(self, **kwargs):
         pass
 
     async def __return_list_db_classes(self, db_class: Base, **kwargs) -> list[Base]:
-        statement = select(db_class).filter_by(**kwargs)
-        data = await self.async_session.scalars(statement)
+        data = await self.__async_session.execute(
+            select(db_class).filter_by(**kwargs)
+        )
         return data.fetchall()
 
-    async def __return_db_classes(self, db_class: Base, class_id: int) -> Base:
-        statement = select(db_class).filter_by(id=class_id)
-        data = await self.async_session.scalars(statement)
-        return data.fetchall()
+    async def __return_db_classes(self, db_class: Base, class_id: int) -> Base | None:
+        data = await self.__async_session.scalars(
+            select(db_class).filter_by(id=class_id)
+        )
+        res = data.fetchall()
+        if res:
+            return res[0]
+        return None
 
     async def users_filter(self, **kwargs) -> list[User]:
         """
@@ -32,6 +37,19 @@ class Getter:
         """
         await self.__check_kwargs(**kwargs)
         return await self.__return_list_db_classes(User, **kwargs)
+
+    async def user_rights_filter(self, **kwargs) -> list[UserRights]:
+        """
+        :param kwargs:
+            'user_id': type:int
+            'max_tokens': type:int
+            'max_subs': type:int
+            'donate': type:bool
+        :rtype: list[DbClasses.UserRights]
+        :return: list[DbClasses.UserRights]
+        """
+        await self.__check_kwargs(**kwargs)
+        return await self.__return_list_db_classes(UserRights, **kwargs)
 
     async def groups_filter(self, **kwargs) -> list[Group]:
         """
@@ -94,6 +112,14 @@ class Getter:
         """
         return await self.__return_db_classes(User, user_id)
 
+    async def user_rights(self, user_id: int) -> UserRights:
+        """
+        :param user_id: int
+        :rtype: DbClasses.UserRights
+        :return: DbClasses.UserRights
+        """
+        return await self.__return_db_classes(UserRights, user_id)
+
     async def group(self, group_id: int) -> Group:
         """
         :param group_id: int
@@ -126,5 +152,15 @@ class Getter:
         """
         return await self.__return_db_classes(Answer, answer_id)
 
+    async def user_all_subs(self, user_id: int) -> list:
+        """
+        :param user_id: int
+        :return:
+        """
+        data = await self.__async_session.execute(
+            select(Group, Subscription.nickname).join(Subscription).filter_by(user_id=user_id))
+        return data.fetchall()
+
 
 getter = Getter()
+

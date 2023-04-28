@@ -118,12 +118,3 @@ class Deleter:
 
 
 deleter = Deleter()
-
-
-
-# from asyncio import run
-# async def fun():
-#     await deleter.users_filter()
-#
-#
-# run(fun())

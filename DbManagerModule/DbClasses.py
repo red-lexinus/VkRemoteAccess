@@ -2,7 +2,6 @@ from sqlalchemy import \
     (Text, Column, String, Integer, Boolean, ForeignKey)
 from sqlalchemy.ext.declarative import declarative_base
 
-
 Base = declarative_base()
 
 
@@ -14,6 +13,17 @@ class User(Base):
 
     def __repr__(self):
         return f"user({self.id}; {self.available}; {self.time_zone})"
+
+
+class UserRights(Base):
+    __tablename__ = 'users_rights'
+    id = Column(Integer, ForeignKey('users.id', ondelete="CASCADE"), primary_key=True)
+    max_tokens = Column(Integer, nullable=False)
+    max_subs = Column(Integer, nullable=False)
+    donate = Column(Boolean, default=False)
+
+    def __repr__(self):
+        return f"users_rights({self.id}; {self.max_tokens}; {self.max_subs}; {self.donate})"
 
 
 class Group(Base):
@@ -45,6 +55,7 @@ class Subscription(Base):
     group_id = Column(Integer, ForeignKey('groups.id', ondelete="CASCADE"), nullable=False)
     user_id = Column(Integer, ForeignKey('users.id', ondelete="CASCADE"), nullable=False)
     token_id = Column(Integer, ForeignKey('tokens.id', ondelete="CASCADE"), nullable=False)
+    nickname = Column(String, default="Группа")
 
     def __repr__(self):
         return f"subscription({self.id}; {self.user_id}; {self.group_id}; {self.token_id})"
@@ -59,4 +70,3 @@ class Answer(Base):
 
     def __repr__(self):
         return f"answer({self.id}; {self.user_id}; {self.nickname}; {self.message})"
-

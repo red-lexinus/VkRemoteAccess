@@ -1,6 +1,6 @@
 from sqlalchemy import select
 
-from .DbClasses import User, Group, Answer, VkApiToken, Subscription
+from .DbClasses import User, Group, Answer, VkApiToken, Subscription, UserRights, Base
 from .DbCore import core
 
 
@@ -8,8 +8,10 @@ class Checker:
     def __init__(self):
         self.async_session = core.get_async_session()
 
-    async def __check(self, statement) -> bool:
-        obj = await self.async_session.scalars(statement)
+    async def __check(self, dm_class: Base, **kwargs) -> bool:
+        obj = await self.async_session.scalars(
+            select(dm_class.id).filter_by(**kwargs)
+        )
         if obj.fetchall():
             return True
         return False
@@ -36,8 +38,7 @@ class Checker:
             print('Всё не так!')
         """
         await self.__check_kwargs(**kwargs)
-        statement = select(User.id).filter_by(**kwargs)
-        return await self.__check(statement)
+        return await self.__check(User, **kwargs)
 
     async def group_exists(self, **kwargs) -> bool:
         """
@@ -59,8 +60,7 @@ class Checker:
             print('Всё не так!')
         """
         await self.__check_kwargs(**kwargs)
-        statement = select(Group.id).filter_by(**kwargs)
-        return await self.__check(statement)
+        return await self.__check(Group, **kwargs)
 
     async def answer_exists(self, **kwargs) -> bool:
         """
@@ -82,8 +82,7 @@ class Checker:
             print('Всё не так!')
         """
         await self.__check_kwargs(**kwargs)
-        statement = select(Answer.id).filter_by(**kwargs)
-        return await self.__check(statement)
+        return await self.__check(Answer, **kwargs)
 
     async def sub_exists(self, **kwargs) -> bool:
         """
@@ -105,8 +104,7 @@ class Checker:
             print('Всё не так!')
         """
         await self.__check_kwargs(**kwargs)
-        statement = select(Subscription.id).filter_by(**kwargs)
-        return await self.__check(statement)
+        return await self.__check(Subscription, **kwargs)
 
     async def token_exists(self, **kwargs) -> bool:
         """
@@ -129,8 +127,7 @@ class Checker:
             print('Всё не так!')
         """
         await self.__check_kwargs(**kwargs)
-        statement = select(VkApiToken.id).filter_by(**kwargs)
-        return await self.__check(statement)
+        return await self.__check(VkApiToken, **kwargs)
 
 
 checker = Checker()

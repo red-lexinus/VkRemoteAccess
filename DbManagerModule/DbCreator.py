@@ -1,5 +1,5 @@
 from other_module import CONFIG
-from .DbClasses import User, Group, Answer, VkApiToken, Subscription
+from .DbClasses import User, Group, Answer, VkApiToken, Subscription, UserRights
 from .DbCore import core
 
 
@@ -19,6 +19,17 @@ class Creator:
         """
         new_user = User(id=user_id)
         await self.__add_commit(new_user)
+        await self.__user_rights(user_id)
+
+    async def __user_rights(self, user_id: int):
+        """
+        :param user_id: int
+        :return: None
+        """
+        new_user_rights = UserRights(
+            id=user_id, max_tokens=CONFIG.MAX_TOKENS_DEFAULT, max_subs=CONFIG.MAX_PUBLIC_DEFAULT
+        )
+        await self.__add_commit(new_user_rights)
 
     async def new_group(self, group_id: int, domain: str, last_post_id: int = 0):
         """
@@ -30,13 +41,14 @@ class Creator:
         new_group = Group(id=group_id, domain=domain, last_post_id=last_post_id)
         await self.__add_commit(new_group)
 
-    async def new_answer(self, user_id: int, message: str):
+    async def new_answer(self, user_id: int, message: str, nickname: str):
         """
         :param user_id: int
         :param message: str
+        :param nickname: str
         :return: None
         """
-        new_answer = Answer(user_id=user_id, message=message)
+        new_answer = Answer(user_id=user_id, message=message, nickname=nickname)
         await self.__add_commit(new_answer)
 
     async def new_token(self, user_id: int, token: str):
@@ -48,14 +60,15 @@ class Creator:
         new_token = VkApiToken(user_id=user_id, token=token, nickname=self.__standard_token_nickname)
         await self.__add_commit(new_token)
 
-    async def new_subs(self, group_id: int, user_id: int, token_id: int):
+    async def new_subs(self, group_id: int, user_id: int, token_id: int, nickname: str = "Группа"):
         """
         :param group_id: int
         :param user_id: int
         :param token_id: int
+        :param nickname: str
         :return: None
         """
-        new_subscription = Subscription(group_id=group_id, user_id=user_id, token_id=token_id)
+        new_subscription = Subscription(group_id=group_id, user_id=user_id, token_id=token_id, nickname=nickname)
         await self.__add_commit(new_subscription)
 
 

@@ -70,3 +70,16 @@ class Answer(Base):
 
     def __repr__(self):
         return f"answer({self.id}; {self.user_id}; {self.nickname}; {self.message})"
+
+
+class StoragePosts(Base):
+    __tablename__ = 'storage'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    storage_id = Column(Integer)
+    group_id = Column(Integer, ForeignKey('groups.id', ondelete="CASCADE"), nullable=False)
+    post_id = Column(Integer, nullable=False)
+    type_id = Column(Integer, default=0)
+    data = Column(Integer)
+
+    def __repr__(self):
+        return f"storage({self.id}; {self.storage_id}; {self.group_id}; {self.post_id})"

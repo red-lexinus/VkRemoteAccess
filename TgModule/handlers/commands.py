@@ -4,9 +4,9 @@ from aiogram import (Dispatcher, types, Router, F, flags)
 from aiogram.fsm.context import FSMContext
 
 from DbManagerModule import checker, getter, creator
-from Tg_module.filters import ChatTypeFilter
-from Tg_module.keyboards import inline
-from Tg_module.templates import commands_message
+from TgModule.filters import ChatTypeFilter
+from TgModule.keyboards import inline
+from TgModule.templates import commands_message
 
 router = Router()
 router.message.filter(ChatTypeFilter('private'))

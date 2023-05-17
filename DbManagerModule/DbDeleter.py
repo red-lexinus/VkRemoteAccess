@@ -1,7 +1,7 @@
 from sqlalchemy import delete
 
-from .DbClasses import Base, User, Group, Answer, VkApiToken, Subscription
-from .DbCore import core
+from DbManagerModule.DbCore import core
+from DbManagerModule.DbClasses import (User, Group, Answer, VkApiToken, Subscription, UserRights, Base)
 
 
 class Deleter:

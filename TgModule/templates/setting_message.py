@@ -47,3 +47,31 @@ def fsm_change_answer() -> str:
 
 def fsm_change_answer_nickname() -> str:
     return "Вы успешно изменили сокращённое имя ответа"
+
+
+def max_subs() -> str:
+    return 'Но вы не можете подписаться на ещё 1 группу, отпишитесь от кого-то или купите расширение прав аккаунта!'
+
+
+def success_sub() -> str:
+    return 'Вы успешно подписались на эту группу, теперь их обновы будут приходить к вам'
+
+
+def success_del_sub() -> str:
+    return 'Вы успешно отписались от группы'
+
+
+def none_sub_group() -> str:
+    return 'Вы отписались от группы! Сначала подпишетесь заново'
+
+
+def open_group(group_name: str) -> str:
+    return f'Группа: {group_name}'
+
+
+def rename_group() -> str:
+    return 'Напишите новое название группы(Это название будет видно только вам)'
+
+
+def success_rename_group(new_nickname: str) -> str:
+    return f'Вы успешно поменяли название для группы, теперь для вас оно будет выглядеть так:\n{new_nickname}'

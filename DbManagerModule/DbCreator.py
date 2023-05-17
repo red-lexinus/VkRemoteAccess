@@ -1,6 +1,6 @@
-from other_module import CONFIG
-from .DbClasses import User, Group, Answer, VkApiToken, Subscription, UserRights
-from .DbCore import core
+from OtherModule import CONFIG
+from DbManagerModule.DbCore import core
+from DbManagerModule.DbClasses import (User, Group, Answer, VkApiToken, Subscription, UserRights, StoragePosts)
 
 
 class Creator:
@@ -70,6 +70,20 @@ class Creator:
         """
         new_subscription = Subscription(group_id=group_id, user_id=user_id, token_id=token_id, nickname=nickname)
         await self.__add_commit(new_subscription)
+
+    async def new_storage_post(self, storage_id: int or None, group_id: int, post_id: int, type_id: int = 0,
+                               data: int or None = None):
+        """
+        :param storage_id: int or None
+        :param group_id: int
+        :param post_id: int
+        :param type_id: int
+        :param data: int or None
+        :return: None
+        """
+        new_storage_post = StoragePosts(storage_id=storage_id, group_id=group_id, post_id=post_id, type_id=type_id,
+                                        data=data)
+        await self.__add_commit(new_storage_post)
 
 
 creator = Creator()

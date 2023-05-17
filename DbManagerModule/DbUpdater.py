@@ -1,7 +1,7 @@
 from sqlalchemy import update
 
-from .DbClasses import User, Group, Answer, VkApiToken, Base, UserRights
-from .DbCore import core
+from DbManagerModule.DbCore import core
+from DbManagerModule.DbClasses import (User, Group, Answer, VkApiToken, Subscription, UserRights, Base)
 
 
 class Updater:
@@ -87,6 +87,11 @@ class Updater:
         :return: None
         """
         await self.__update(VkApiToken, class_id=token_id, serviceable=serviceable)
+
+    async def sub_nickname(self, user_id: int, group_id: int, nickname: str):
+        obj = update(Subscription).filter_by(user_id=user_id).filter_by(group_id=group_id).values(nickname=nickname)
+        await self.__async_session.execute(obj)
+        await self.__async_session.commit()
 
 
 updater = Updater()

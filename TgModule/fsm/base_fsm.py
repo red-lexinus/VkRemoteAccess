@@ -29,3 +29,9 @@ class ChangeAnswer(StatesGroup):
 class CreateAnswer(StatesGroup):
     answer = State()
     nickname = State()
+
+
+class DeployComment(StatesGroup):
+    token = State()
+    group_id = State()
+    post_id = State()

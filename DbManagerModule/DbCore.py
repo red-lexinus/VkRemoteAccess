@@ -2,8 +2,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy.orm.session import sessionmaker, close_all_sessions
 
-from other_module import CONFIG
-from .DbClasses import Base
+from OtherModule import CONFIG
+from DbManagerModule.DbClasses import (Base)
 
 
 class Core:

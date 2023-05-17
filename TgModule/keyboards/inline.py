@@ -4,7 +4,7 @@ from aiogram.filters.callback_data import CallbackData
 
 from sqlalchemy.engine.row import Row as sqlalchemyRow
 
-from DbManagerModule.DbClasses import Group, VkApiToken, Answer
+from DbManagerModule.DbClasses import Subscription, VkApiToken, Answer
 
 
 class StandardAnswer(CallbackData, prefix="StA"):
@@ -20,7 +20,9 @@ class DetailedAnswer(CallbackData, prefix="DtA"):
 
 class UserSubscription(CallbackData, prefix="USb"):
     group_id: int
+    token_id: int | None
     action: str
+    group_name: str | None
 
 
 class UserToken(CallbackData, prefix="UTk"):
@@ -31,6 +33,13 @@ class UserToken(CallbackData, prefix="UTk"):
 class UserAnswer(CallbackData, prefix="UAn"):
     answer_id: int
     action: str
+
+
+class Commenting(CallbackData, prefix='Com'):
+    action: str
+    group_id: int
+    post_id: int
+    answer_id: int | None
 
 
 class MainDialog(CallbackData, prefix="MnD"):
@@ -75,13 +84,13 @@ def get_answer():
     return builder.as_markup()
 
 
-def get_my_group_kb(groups: list[sqlalchemyRow[Group, int]]):
+def get_my_group_kb(groups: list[sqlalchemyRow[Subscription]]):
     builder = InlineKeyboardBuilder()
-    for sub in groups:
-        s = list(sub)
-        group_id, group_name = s[0].id, s[1]
-        builder.button(text=f"{group_name}", callback_data=UserSubscription(group_id=group_id, action="open").pack())
-        builder.button(text="Отписаться", callback_data=UserSubscription(group_id=group_id, action="del").pack())
+    for sub_data in groups:
+        sub = sub_data[0]
+        builder.button(text=f"{sub.nickname}",
+                       callback_data=UserSubscription(group_id=sub.group_id, action="open").pack())
+        builder.button(text="Отписаться", callback_data=UserSubscription(group_id=sub.group_id, action="del").pack())
     builder.adjust(2)
     return builder.as_markup()
 
@@ -113,4 +122,42 @@ def get_open_answer(answer_id: int):
     builder.button(text="Изменить сокращение", callback_data=UserAnswer(answer_id=answer_id, action="chg_nik").pack())
     builder.button(text="Удалить авто-ответ", callback_data=UserAnswer(answer_id=answer_id, action="del").pack())
     builder.adjust(1)
+    return builder.as_markup()
+
+
+def sub_new_group(group_id: int, group_name: str, tokens: list[VkApiToken]):
+    builder = InlineKeyboardBuilder()
+    for token in tokens:
+        builder.button(
+            text=f"Подписаться❤ {token.nickname}", callback_data=UserSubscription(
+                group_id=group_id, token_id=token.id, action="sub", group_name=group_name).pack()
+        )
+    builder.adjust(1)
+    return builder.as_markup()
+
+
+def get_open_group_kb(group_id: int):
+    builder = InlineKeyboardBuilder()
+    builder.button(
+        text=f"Переименовать группу", callback_data=UserSubscription(
+            group_id=group_id, action="rename").pack()
+    )
+    builder.adjust(1)
+    return builder.as_markup()
+
+
+def get_comment_post_ikb(group_id: int, post_id: int, answers: list[sqlalchemyRow[Answer]]):
+    builder = InlineKeyboardBuilder()
+    builder.button(
+        text=f"написать ответ", callback_data=Commenting(action="deploy",
+                                                         group_id=group_id, post_id=post_id, answer_id=None).pack()
+    )
+    for answer_data in answers:
+        answer = list(answer_data)[0]
+        builder.button(
+            text=f"{answer.nickname}", callback_data=Commenting(action="send",
+                                                                group_id=group_id, post_id=post_id,
+                                                                answer_id=answer.id).pack()
+        )
+    builder.adjust(1, 2)
     return builder.as_markup()

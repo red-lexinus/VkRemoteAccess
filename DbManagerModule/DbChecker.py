@@ -1,15 +1,15 @@
 from sqlalchemy import select
 
-from .DbClasses import User, Group, Answer, VkApiToken, Subscription, UserRights, Base
-from .DbCore import core
+from DbManagerModule.DbCore import core
+from DbManagerModule.DbClasses import (User, Group, Answer, VkApiToken, Subscription, UserRights, Base)
 
 
 class Checker:
     def __init__(self):
-        self.async_session = core.get_async_session()
+        self.__async_session = core.get_async_session()
 
     async def __check(self, dm_class: Base, **kwargs) -> bool:
-        obj = await self.async_session.scalars(
+        obj = await self.__async_session.scalars(
             select(dm_class.id).filter_by(**kwargs)
         )
         if obj.fetchall():
@@ -128,6 +128,20 @@ class Checker:
         """
         await self.__check_kwargs(**kwargs)
         return await self.__check(VkApiToken, **kwargs)
+
+    async def new_sub(self, user_id: int) -> bool:
+        """
+        :param user_id: type:int
+        :rtype: bool
+        :return: Ответ, можно ли пользователю добавить подписку на группу
+        """
+        user_root = await self.__async_session.execute(
+            select(UserRights).filter_by(id=user_id)
+        )
+        user_subs = await self.__async_session.execute(
+            select(Subscription.id).filter_by(user_id=user_id)
+        )
+        return user_root.fetchall()[0][0].max_subs > len(user_subs.fetchall())
 
 
 checker = Checker()

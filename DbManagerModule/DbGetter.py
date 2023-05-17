@@ -1,7 +1,7 @@
-from sqlalchemy import select, join
+from sqlalchemy import select
 
-from .DbClasses import Base, User, Group, Answer, VkApiToken, Subscription, UserRights
-from .DbCore import core
+from DbManagerModule.DbCore import core
+from DbManagerModule.DbClasses import (User, Group, Answer, VkApiToken, StoragePosts, Subscription, UserRights, Base)
 
 
 class Getter:
@@ -153,14 +153,49 @@ class Getter:
         return await self.__return_db_classes(Answer, answer_id)
 
     async def user_all_subs(self, user_id: int) -> list:
-        """
-        :param user_id: int
-        :return:
-        """
         data = await self.__async_session.execute(
-            select(Group, Subscription.nickname).join(Subscription).filter_by(user_id=user_id))
+            select(Subscription).select_from(Subscription).
+            where(Subscription.user_id == user_id))
         return data.fetchall()
+
+    async def updated_groups(self) -> list:
+        data = await self.__async_session.execute(
+            select(Group.id, Group.last_post_id, VkApiToken.token).select_from(Group).join(Subscription).join(
+                VkApiToken).
+            where(Subscription.group_id == Group.id).
+            where(Subscription.token_id == VkApiToken.id).
+            where(Group.serviceable and VkApiToken.serviceable).
+            order_by(Group.id)
+        )
+        return data.fetchall()
+
+    async def data_for_mailing_posts(self, group_id: int, old_post_id: int) -> list:
+        users = await self.__async_session.execute(
+            select(User.id, User.time_zone, Subscription.nickname).select_from(User).join(Subscription).
+            where(Subscription.group_id == group_id).
+            where(Subscription.user_id == User.id).
+            where(User.available)
+        )
+        new_posts = await self.__async_session.execute(
+            select(StoragePosts).select_from(StoragePosts).
+            where(StoragePosts.group_id == group_id).
+            where(StoragePosts.post_id > old_post_id).
+            order_by(StoragePosts.id)
+        )
+        user = users.fetchall()
+        posts = new_posts.fetchall()
+        return [user, posts]
+
+    async def token_by_sub(self, user_id: int, group_id: int):
+        sub = await self.__async_session.execute(
+            select(Subscription.token_id).select_from(Subscription).
+            where(Subscription.user_id == user_id).
+            where(Subscription.group_id == group_id)
+        )
+        sub = sub.fetchall()
+        if sub:
+            token_id = sub[0][0]
+            return await self.token(token_id)
 
 
 getter = Getter()
-
